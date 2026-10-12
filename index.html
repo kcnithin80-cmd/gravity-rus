@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Gravity Rush - Modern 2D Physics Arcade Game</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="game-container">
+        <!-- Main High-Performance Game Canvas -->
+        <canvas id="game-canvas"></canvas>
+
+        <!-- Modern Futuristic HUD (Reference Image 2) -->
+        <header id="hud">
+            <div class="hud-left">
+                <div class="hud-title-wrap">
+                    <span class="hud-game-name">GRAVITY RUSH</span>
+                    <span id="hud-level-text" class="hud-level-tag">LEVEL 1 // NEO CITY</span>
+                </div>
+            </div>
+
+            <div class="hud-center">
+                <div class="hud-progress-container">
+                    <div class="hud-progress-track">
+                        <div id="hud-progress-fill" class="hud-progress-fill"></div>
+                    </div>
+                    <span id="hud-progress-percent" class="hud-progress-percent">0%</span>
+                </div>
+
+                <div class="hud-stats-group">
+                    <div class="hud-stat-item">
+                        <span class="icon">💀</span>
+                        <span id="hud-deaths">0</span>
+                    </div>
+                    <div class="hud-stat-item">
+                        <span class="icon">⏱</span>
+                        <span id="hud-timer" class="hud-timer-val">00:00.00</span>
+                    </div>
+                    <div class="hud-stat-item">
+                        <span id="hud-best-time" class="hud-best-val">Best: --:--.--</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="hud-right">
+                <button id="btn-hud-audio" class="hud-btn" title="Toggle Sound">
+                    <svg viewBox="0 0 24 24" class="icon"><path fill="currentColor" d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+                </button>
+                <button id="btn-hud-restart" class="hud-btn" title="Restart Level [R]">
+                    <svg viewBox="0 0 24 24" class="icon"><path fill="currentColor" d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+                </button>
+                <button id="btn-hud-pause" class="hud-btn" title="Pause Game [P / Esc]">
+                    <svg viewBox="0 0 24 24" class="icon"><path fill="currentColor" d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Floating Non-Intrusive Tutorial Tip -->
+        <div id="tutorial-tip" class="hidden">PRESS [A] / [D] TO MOVE</div>
+
+        <!-- LEVEL COMPLETE MODAL (Reference Image 2) -->
+        <div id="modal-complete" class="modal-overlay hidden">
+            <div class="cyber-card">
+                <h2 id="complete-level-title" class="modal-header-title">LEVEL COMPLETE</h2>
+                
+                <div id="complete-stars" class="stars-container">
+                    <span class="star-icon">★</span>
+                    <span class="star-icon">★</span>
+                    <span class="star-icon">★</span>
+                </div>
+
+                <div class="complete-stats-grid">
+                    <div class="stat-row">
+                        <span class="stat-label">Completion Time</span>
+                        <span id="complete-time" class="stat-val">00:00.00</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Deaths</span>
+                        <span id="complete-deaths" class="stat-val">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Best Time</span>
+                        <span id="complete-best-time" class="stat-val">00:00.00</span>
+                    </div>
+                    <div id="complete-record-badge" class="record-badge hidden">✨ NEW RECORD!</div>
+                </div>
+
+                <div class="modal-actions-row">
+                    <button id="btn-complete-replay" class="cyber-btn cyber-btn-secondary">↺ REPLAY</button>
+                    <button id="btn-complete-next" class="cyber-btn cyber-btn-primary">NEXT LEVEL ▶</button>
+                    <button id="btn-complete-select" class="cyber-btn cyber-btn-secondary">LEVELS ☰</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAUSE MODAL -->
+        <div id="modal-pause" class="modal-overlay hidden">
+            <div class="cyber-card">
+                <h2 class="modal-header-title">SYSTEM PAUSED</h2>
+
+                <div class="settings-group">
+                    <div class="setting-item">
+                        <span>SFX Volume</span>
+                        <input id="slider-sfx" type="range" min="0" max="1" step="0.05" value="0.8" class="setting-slider">
+                    </div>
+                    <div class="setting-item">
+                        <span>Music Volume</span>
+                        <input id="slider-music" type="range" min="0" max="1" step="0.05" value="0.6" class="setting-slider">
+                    </div>
+                    <div class="setting-item">
+                        <span>Screen Shake</span>
+                        <input id="check-shake" type="checkbox" checked>
+                    </div>
+                    <div class="setting-item">
+                        <span>Particle VFX</span>
+                        <select id="select-particles" class="setting-select">
+                            <option value="high">High (60 FPS)</option>
+                            <option value="medium">Medium</option>
+                            <option value="low">Low (Performance)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="modal-actions-row" style="flex-direction: column; gap: 10px;">
+                    <button id="btn-pause-resume" class="cyber-btn cyber-btn-primary">RESUME GAME ▶</button>
+                    <button id="btn-pause-restart" class="cyber-btn cyber-btn-secondary">RESTART LEVEL ↺</button>
+                    <button id="btn-pause-skins" class="cyber-btn cyber-btn-secondary">BALL SKINS 🎨</button>
+                    <button id="btn-pause-select" class="cyber-btn cyber-btn-secondary">LEVEL SELECT ☰</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- LEVEL SELECT MODAL -->
+        <div id="modal-select" class="modal-overlay hidden">
+            <div class="cyber-card level-select-card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                    <h2 class="modal-header-title" style="margin: 0;">SELECT MISSION</h2>
+                    <span id="select-total-stars" class="record-badge" style="font-size: 16px;">★ 0</span>
+                </div>
+
+                <!-- World Selector Tabs -->
+                <div id="select-world-tabs" class="world-tabs-bar"></div>
+
+                <!-- Grid of levels for selected world -->
+                <div id="select-level-grid" class="level-grid-container"></div>
+
+                <div class="modal-actions-row" style="margin-top: 20px;">
+                    <button id="btn-endless-mode" class="cyber-btn cyber-btn-primary">⚡ ENDLESS CHALLENGE</button>
+                    <button id="btn-close-select" class="cyber-btn cyber-btn-secondary">CLOSE</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- BALL SKIN CUSTOMIZER MODAL (Reference Image 1) -->
+        <div id="modal-skins" class="modal-overlay hidden">
+            <div class="cyber-card skin-modal-card">
+                <h2 class="modal-header-title">HULL CUSTOMIZER</h2>
+                
+                <!-- Real-time 3D Rotating Ball Preview -->
+                <div class="skin-preview-wrap">
+                    <canvas id="skin-preview-canvas" width="140" height="140"></canvas>
+                </div>
+
+                <!-- Grid of 6 Skins from Reference 1 -->
+                <div id="skin-cards" class="skin-grid-cards"></div>
+
+                <div class="modal-actions-row">
+                    <button id="btn-close-skins" class="cyber-btn cyber-btn-primary">APPLY & CLOSE</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ON-SCREEN TOUCH CONTROLS (Mobile / Tablet) -->
+        <div id="touch-controls">
+            <div class="touch-cluster-left">
+                <button id="touch-left" class="touch-btn" aria-label="Move Left">◀</button>
+                <button id="touch-right" class="touch-btn" aria-label="Move Right">▶</button>
+            </div>
+            <div class="touch-cluster-right">
+                <button id="touch-jump" class="touch-btn jump-btn" aria-label="Jump">▲</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Engine Module Entry Point -->
+    <script type="module" src="js/game.js"></script>
+</body>
+</html>
